@@ -19,6 +19,7 @@
 #define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
 #define WGL_CONTEXT_FLAGS_ARB 0x2094
 #define WGL_CONTEXT_DEBUG_BIT_ARB 0x0001
+#define WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 0x00000002
 
 typedef const char * (*PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
 typedef BOOL (*PFNWGLCHOOSEPIXELFORMATARBPROC)(HDC hdc, const int32_t* piAttribIList, const FLOAT* pfAttribFList, UINT nMaxFormats, int32_t* piFormats, UINT* nNumFormats);
@@ -120,7 +121,8 @@ static void load_wgl_funcs(void) {
 		panic("OpenGL does not support required WGL extensions for modern context!");
 	}
 
-	printf("OpenGL loaded: %s\n", glGetString(GL_VERSION));
+	// TODO(ellora): Move to logging system
+	printf("[LOG] %s\n", glGetString(GL_VERSION));
 
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(rc);
@@ -202,6 +204,7 @@ void os_create_window(int32_t width, int32_t height, const char *name) {
 			WGL_CONTEXT_MAJOR_VERSION_ARB, GL_MAJOR,
 			WGL_CONTEXT_MINOR_VERSION_ARB, GL_MINOR,
 			WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+			// WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
 #ifndef DEBUG
 			// ask for debug context for non "Release" builds
 			// this is so we can enable debug callback
