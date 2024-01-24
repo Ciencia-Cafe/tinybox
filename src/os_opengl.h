@@ -32,6 +32,7 @@
 #define GL_VERSION 0x1F02
 
 typedef uint32_t GLenum;
+typedef uint32_t GLuint32;
 typedef uint8_t GLboolean;
 typedef uint32_t GLbitfield;
 typedef char GLchar;

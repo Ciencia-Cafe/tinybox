@@ -45,11 +45,25 @@ static void panic(const char* message) {
 	ExitProcess(0);
 }
 
-#ifndef DEBUG
+static LPWSTR utf8_to_utf16(const char* utf8) {
+	int32_t len = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, NULL, 0);
+	LPWSTR utf16 = calloc(len, sizeof(WCHAR));
+	MultiByteToWideChar(CP_UTF8, 0, utf8, -1, utf16, len);
+
+	return utf16;
+}
+
+#ifdef DEBUG
 static void debug_callback(
-	GLenum source, GLenum type, GLuint32_t id, GLenum severity,
+	GLenum source, GLenum type, GLuint32 id, GLenum severity,
 	GLsizei length, const GLchar* message, const void* user)
 {
+	(void)source;
+	(void)type;
+	(void)id;
+	(void)length;
+	(void)user;
+
 	OutputDebugStringA(message);
 	OutputDebugStringA("\n");
 	if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM) {
@@ -121,9 +135,6 @@ static void load_wgl_funcs(void) {
 		panic("OpenGL does not support required WGL extensions for modern context!");
 	}
 
-	// TODO(ellora): Move to logging system
-	printf("[LOG] %s\n", glGetString(GL_VERSION));
-
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(rc);
 	ReleaseDC(dummy, dc);
@@ -152,7 +163,7 @@ void os_create_window(int32_t width, int32_t height, const char *name) {
 
 	// create window
 	self.win_handler = CreateWindowExW(
-		exstyle, wc.lpszClassName, L"OpenGL Window", style,
+		exstyle, wc.lpszClassName, utf8_to_utf16(name), style,
 		CW_USEDEFAULT, CW_USEDEFAULT, width, height,
 		NULL, NULL, wc.hInstance, NULL);
 	assert(self.win_handler && "Failed to create window");
@@ -204,9 +215,8 @@ void os_create_window(int32_t width, int32_t height, const char *name) {
 			WGL_CONTEXT_MAJOR_VERSION_ARB, GL_MAJOR,
 			WGL_CONTEXT_MINOR_VERSION_ARB, GL_MINOR,
 			WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-			// WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
-#ifndef DEBUG
-			// ask for debug context for non "Release" builds
+#ifdef DEBUG
+			// Ask for debug context for non "Release" builds
 			// this is so we can enable debug callback
 			WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
 #endif
@@ -227,7 +237,7 @@ void os_create_window(int32_t width, int32_t height, const char *name) {
 		GL_FUNCTIONS(X)
 #undef X
 
-#ifndef DEBUG
+#ifdef DEBUG
 		// Enable debug callback
 		glDebugMessageCallback(&debug_callback, NULL);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

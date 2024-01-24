@@ -13,6 +13,9 @@
 int entry_point ( void ) {
 	os_create_window(800, 600, "hello sailor");
 
+	// TODO(ellora): Move to logging system
+	printf("[LOG] %s\n", glGetString(GL_VERSION));
+
 	while (!os_window_should_close()) {
 		if (os_window_is_visible()) {
 			glClearColor(0.1f, 0.2f, 0.3f, 1.f);
