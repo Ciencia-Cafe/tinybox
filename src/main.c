@@ -16,17 +16,17 @@
 int entry_point ( void ) {
 	os_create_window(800, 600, "hello sailor");
 
-#define PRINT_ARENA(arena) printf("Arena: size=%zu offset=%zu\n", arena.size, arena.offset)
-
 	// Lets test arena
+{
 	Arena arena;
-	arena_init(&arena, 4096);
-	PRINT_ARENA(arena);
+#define PRINT printf("Arena: size=%zu offset=%zu\n", arena.size, arena.offset)
+	arena_init(&arena, 4096); PRINT;
 	const char *str = arena_sprintf(&arena, "Hello %s", "World");
-	printf("alocates: %s\n", str);
-	PRINT_ARENA(arena);
-	arena_reset(&arena);
-	PRINT_ARENA(arena);
+	printf("alocates: %s\n", str); PRINT;
+	arena_reset(&arena); PRINT;
+	arena_destroy(&arena);
+#undef PRINT
+}
 
 	// TODO(ellora): Move to logging system
 	printf("[LOG] %s\n", glGetString(GL_VERSION));
