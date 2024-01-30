@@ -1,24 +1,24 @@
-#define SOURCE_VS                              \
-	"#version 330 core\n"                      \
-	"layout (location = 0) in vec2 a_pos;"     \
-	"layout (location = 1) in vec4 a_color;"   \
-	"layout (location = 2) in vec2 a_uv;"      \
-	"out vec4 color;"                          \
-	"out vec2 uv;"                             \
-	"void main() {"                            \
-	"	gl_Position = vec4(a_pos, 0.0, 1.0);"  \
-	"	color = a_color;"                      \
-	"	uv = a_uv;"                            \
-	"}"
+#define SOURCE_VS                          \
+"#version 330 core\n"                      \
+"layout (location = 0) in vec2 a_pos;"     \
+"layout (location = 1) in vec4 a_color;"   \
+"layout (location = 2) in vec2 a_uv;"      \
+"out vec4 color;"                          \
+"out vec2 uv;"                             \
+"void main() {"                            \
+"   gl_Position = vec4(a_pos, 0.0, 1.0);"  \
+"   color = a_color;"                      \
+"   uv = a_uv;"                            \
+"}"
 
-#define SOURCE_FS              \
-	"#version 330 core\n"      \
-	"out vec4 colour;"         \
-	"in vec4 color;"           \
-	"in vec2 uv;"              \
-	"void main() {"            \
-	"	colour = vec4(color);" \
-	"}"
+#define SOURCE_FS           \
+"#version 330 core\n"       \
+"out vec4 colour;"          \
+"in vec4 color;"            \
+"in vec2 uv;"               \
+"void main() {"             \
+"    colour = vec4(color);" \
+"}"
 
 static uint32_t igfx_load_shader(const char *src, uint32_t type); 
 static uint32_t igfx_load_program(const char *vs, const char *fs);

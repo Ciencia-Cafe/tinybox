@@ -19,7 +19,9 @@
 #endif
 
 int entry_point ( void ) {
+	os_load_gl();
 	os_create_window(800, 600, "hello sailor");
+	gfx_init();
 
 	// Lets test arena
 {
@@ -32,9 +34,6 @@ int entry_point ( void ) {
 	arena_destroy(&arena);
 #undef PRINT
 }
-
-	gfx_init();
-
 	while (!os_window_should_close()) {
 		if (os_window_is_visible()) {
 			gfx_begin();

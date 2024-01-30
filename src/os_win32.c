@@ -85,7 +85,7 @@ static LRESULT CALLBACK win_proc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lpara
 	return DefWindowProcW(wnd, msg, wparam, lparam);
 }
 
-static void load_wgl_funcs(void) {
+void os_load_gl( void ) {
 	// To get WGL functions we need valid GL context,
 	// so create dummy window for dummy GL contetx.
 	HWND dummy = CreateWindowExW(
@@ -290,11 +290,7 @@ void os_sleep(uint32_t miliseconds) {
 int32_t entry_point ( void );
 
 int32_t WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR cmd, int32_t show) {
-	(void)prev;
-	(void)cmd;
-	(void)show;
-
+	(void)prev; (void)cmd; (void)show;
 	self.instance = instance;
-	load_wgl_funcs();
 	return entry_point();
 }
