@@ -262,13 +262,18 @@ bool os_window_should_close() {
 	return false;
 }
 
-bool os_window_is_visible() {
+vec2 os_window_size() {
 	RECT rect;
 	GetClientRect(self.win_handler, &rect);
 	int32_t width = rect.right - rect.left;
 	int32_t height = rect.bottom - rect.top;
 
-	return width != 0 && height != 0;
+	return (vec2){ .x = (float)width, .y = (float)height };
+}
+
+bool os_window_is_visible() {
+	vec2 size = os_window_size();
+	return size.x != 0 && size.y != 0;
 }
 
 void os_swap_buffers() {

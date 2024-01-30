@@ -3,13 +3,18 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <math.h>
 
-#include "os_opengl.h"
-#include "os_api.h"
-
+#include "lin_math.c"
 #include "arena.c"
 
+#include "os_api.h"
+#include "os_opengl.h"
+#include "gfx_api.h"
+
 #if defined(_WIN32) || defined(_WIN64)
+#include "gfx_opengl.c"
 #include "os_win32.c"
 #endif
 
@@ -19,22 +24,21 @@ int entry_point ( void ) {
 	// Lets test arena
 {
 	Arena arena;
-#define PRINT printf("Arena: size=%zu offset=%zu\n", arena.size, arena.offset)
-	arena_init(&arena, 4096); PRINT;
+#define PRINT(call) call;printf("Arena: size=%zu offset=%zu\n", arena.size, arena.offset)
+	PRINT(arena_init(&arena, 4096));
 	const char *str = arena_sprintf(&arena, "Hello %s", "World");
-	printf("alocates: %s\n", str); PRINT;
-	arena_reset(&arena); PRINT;
+	PRINT(printf("alocates: %s\n", str));
+	PRINT(arena_reset(&arena));
 	arena_destroy(&arena);
 #undef PRINT
 }
 
-	// TODO(ellora): Move to logging system
-	printf("[LOG] %s\n", glGetString(GL_VERSION));
+	gfx_init();
 
 	while (!os_window_should_close()) {
 		if (os_window_is_visible()) {
-			glClearColor(0.1f, 0.2f, 0.3f, 1.f);
-			glClear(GL_COLOR_BUFFER_BIT);
+			gfx_begin();
+			gfx_end();
 			os_swap_buffers();
 		}
 		else {

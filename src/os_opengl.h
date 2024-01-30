@@ -30,6 +30,9 @@
 #define GL_DEBUG_SEVERITY_HIGH 0x9146
 #define GL_DEBUG_SEVERITY_MEDIUM 0x9147
 #define GL_VERSION 0x1F02
+#define GL_COMPILE_STATUS 0x8B81
+#define GL_ARRAY_BUFFER 0x8892
+#define GL_STATIC_DRAW 0x88E4
 
 typedef uint32_t GLenum;
 typedef uint32_t GLuint32;
@@ -64,13 +67,30 @@ typedef void (*PFNGLVERTEXARRAYVERTEXBUFFERPROC)(GLuint vaobj, GLuint bindingind
 typedef void (*PFNGLVERTEXARRAYATTRIBFORMATPROC)(GLuint vaobj, GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint relativeoffset);
 typedef void (*PFNGLENABLEVERTEXARRAYATTRIBPROC)(GLuint vaobj, GLuint index);
 typedef GLuint (*PFNGLCREATESHADERPROGRAMVPROC)(GLenum type, GLsizei count, const GLchar* const* strings);
-typedef void (*PFNGLGETPROGRAMIVPROC)(GLuint program, GLenum pname, GLint* params);
 typedef void (*PFNGLGETPROGRAMINFOLOGPROC)(GLuint program, GLsizei bufSize, GLsizei* length, GLchar* infoLog);
 typedef void (*PFNGLGENPROGRAMPIPELINESPROC)(GLsizei n, GLuint* pipelines);
 typedef void (*PFNGLUSEPROGRAMSTAGESPROC)(GLuint pipeline, GLbitfield stages, GLuint program);
 typedef void (*PFNGLBINDPROGRAMPIPELINEPROC)(GLuint pipeline);
 typedef void (*PFNGLPROGRAMUNIFORMMATRIX2FVPROC)(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
 typedef void (*PFNGLDEBUGMESSAGECALLBACKPROC)(void* callback, const void* userParam);
+typedef void (*PFNGLATTACHSHADERPROC)(GLuint program, GLuint shader);
+typedef void (*PFNGLLINKPROGRAMPROC)(GLuint program);
+typedef void (*PFNGLSHADERSOURCEPROC)(GLuint shader, GLsizei count, const GLchar* const* string, const GLint* length);
+typedef void (*PFNGLCOMPILESHADERPROC)(GLuint shader);
+typedef GLuint (*PFNGLCREATESHADERPROC)(GLenum type);
+typedef void (*PFNGLGETSHADERIVPROC)(GLuint shader, GLenum pname, GLint* params);
+typedef void (*PFNGLGETPROGRAMIVPROC)(GLuint program, GLenum pname, GLint* params);
+typedef void (*PFNGLGETSHADERINFOLOGPROC)(GLuint shader, GLsizei bufSize, GLsizei* length, GLchar* infoLog);
+typedef GLuint (*PFNGLCREATEPROGRAMPROC)(void);
+typedef void (*PFNGLDELETESHADERPROC)(GLuint shader);
+typedef void (*PFNGLBINDBUFFERPROC)(GLenum target, GLuint buffer);
+typedef void (*PFNGLBUFFERDATAPROC)(GLenum target, GLsizeiptr size, const void* data, GLenum usage);
+typedef void (*PFNGLGENBUFFERSPROC)(GLsizei n, GLuint* buffers);
+typedef void (*PFNGLVERTEXATTRIBPOINTERPROC)(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer);
+typedef void (*PFNGLENABLEVERTEXATTRIBARRAYPROC)(GLuint index);
+typedef void (*PFNGLUSEPROGRAMPROC)(GLuint program);
+
+
 
 #define GL_FUNCTIONS(X) \
 	X(PFNGLCREATEBUFFERSPROC, glCreateBuffers) \
@@ -82,13 +102,28 @@ typedef void (*PFNGLDEBUGMESSAGECALLBACKPROC)(void* callback, const void* userPa
 	X(PFNGLVERTEXARRAYATTRIBFORMATPROC, glVertexArrayAttribFormat) \
 	X(PFNGLENABLEVERTEXARRAYATTRIBPROC, glEnableVertexArrayAttrib) \
 	X(PFNGLCREATESHADERPROGRAMVPROC, glCreateShaderProgramv) \
-	X(PFNGLGETPROGRAMIVPROC, glGetProgramiv) \
 	X(PFNGLGETPROGRAMINFOLOGPROC, glGetProgramInfoLog) \
 	X(PFNGLGENPROGRAMPIPELINESPROC, glGenProgramPipelines) \
 	X(PFNGLUSEPROGRAMSTAGESPROC, glUseProgramStages) \
 	X(PFNGLBINDPROGRAMPIPELINEPROC, glBindProgramPipeline) \
 	X(PFNGLPROGRAMUNIFORMMATRIX2FVPROC, glProgramUniformMatrix2fv) \
-	X(PFNGLDEBUGMESSAGECALLBACKPROC, glDebugMessageCallback)
+	X(PFNGLDEBUGMESSAGECALLBACKPROC, glDebugMessageCallback) \
+	X(PFNGLATTACHSHADERPROC, glAttachShader) \
+	X(PFNGLLINKPROGRAMPROC, glLinkProgram) \
+	X(PFNGLSHADERSOURCEPROC, glShaderSource) \
+	X(PFNGLCOMPILESHADERPROC, glCompileShader) \
+	X(PFNGLCREATESHADERPROC, glCreateShader) \
+	X(PFNGLGETSHADERIVPROC, glGetShaderiv) \
+	X(PFNGLGETPROGRAMIVPROC, glGetProgramiv) \
+	X(PFNGLGETSHADERINFOLOGPROC, glGetShaderInfoLog) \
+	X(PFNGLCREATEPROGRAMPROC, glCreateProgram) \
+	X(PFNGLDELETESHADERPROC, glDeleteShader) \
+	X(PFNGLBINDBUFFERPROC, glBindBuffer) \
+	X(PFNGLBUFFERDATAPROC, glBufferData) \
+	X(PFNGLGENBUFFERSPROC, glGenBuffers) \
+	X(PFNGLVERTEXATTRIBPOINTERPROC, glVertexAttribPointer) \
+	X(PFNGLENABLEVERTEXATTRIBARRAYPROC, glEnableVertexAttribArray) \
+	X(PFNGLUSEPROGRAMPROC, glUseProgram)
 
 #define X(type, name) type name;
 GL_FUNCTIONS(X)
