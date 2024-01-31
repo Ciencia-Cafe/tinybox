@@ -6,6 +6,10 @@
 #include "opengl.h"
 #include <assert.h>
 
+#define X(type, name) type name;
+GL_FUNCTIONS(X)
+#undef X
+
 static struct
 {
 	HINSTANCE instance;
@@ -50,7 +54,7 @@ static void debug_callback(
 		if (IsDebuggerPresent()) {
 			assert(!"OpenGL error - check the callstack in debugger");
 		}
-		os_panic("OpenGL API usage error! Use debugger to examine call stack!");
+		os_panic(message);
 	}
 }
 #endif

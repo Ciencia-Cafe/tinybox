@@ -34,5 +34,6 @@ Mesh;
 
 void render_init();
 void render_mesh(Mesh *m);
+void render_pass();
 
 #endif

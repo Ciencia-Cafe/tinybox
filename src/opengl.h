@@ -146,7 +146,7 @@ typedef void (*PFNGLUSEPROGRAMPROC)(GLuint program);
 	X(PFNGLENABLEVERTEXATTRIBARRAYPROC, glEnableVertexAttribArray) \
 	X(PFNGLUSEPROGRAMPROC, glUseProgram)
 
-#define X(type, name) type name;
+#define X(type, name) extern type name;
 GL_FUNCTIONS(X)
 #undef X
 

@@ -3,11 +3,15 @@
 // license that can be found in the LICENSE file.
 
 #include "os.h"
+#include "render.h"
 
 int entry_point ( void ) {
 	os_create_window(800, 600, "hello sailor");
+	render_init();
+
 	while (!os_window_should_close()) {
 		if (os_window_is_visible()) {
+			render_pass();
 			os_swap_buffers();
 		}
 		else {

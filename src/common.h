@@ -1,3 +1,7 @@
+// Copyright 2023 Elloramir.
+// Use of this source code is governed by a MIT
+// license that can be found in the LICENSE file.
+
 #ifndef TINYBOX_COMMON_H
 #define TINYBOX_COMMON_H
 
