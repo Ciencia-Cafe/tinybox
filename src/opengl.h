@@ -113,14 +113,13 @@ typedef void (*PFNGLGETPROGRAMIVPROC)(GLuint program, GLenum pname, GLint* param
 typedef void (*PFNGLGETSHADERINFOLOGPROC)(GLuint shader, GLsizei bufSize, GLsizei* length, GLchar* infoLog);
 typedef GLuint (*PFNGLCREATEPROGRAMPROC)(void);
 typedef void (*PFNGLDELETESHADERPROC)(GLuint shader);
+typedef void (*PFNGLDELETEPROGRAMPROC)(GLuint program);
 typedef void (*PFNGLBINDBUFFERPROC)(GLenum target, GLuint buffer);
 typedef void (*PFNGLBUFFERDATAPROC)(GLenum target, GLsizeiptr size, const void* data, GLenum usage);
 typedef void (*PFNGLGENBUFFERSPROC)(GLsizei n, GLuint* buffers);
 typedef void (*PFNGLVERTEXATTRIBPOINTERPROC)(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer);
 typedef void (*PFNGLENABLEVERTEXATTRIBARRAYPROC)(GLuint index);
 typedef void (*PFNGLUSEPROGRAMPROC)(GLuint program);
-
-
 
 #define GL_FUNCTIONS(X) \
 	X(PFNGLCREATEBUFFERSPROC, glCreateBuffers) \
@@ -139,6 +138,7 @@ typedef void (*PFNGLUSEPROGRAMPROC)(GLuint program);
 	X(PFNGLGETSHADERINFOLOGPROC, glGetShaderInfoLog) \
 	X(PFNGLCREATEPROGRAMPROC, glCreateProgram) \
 	X(PFNGLDELETESHADERPROC, glDeleteShader) \
+	X(PFNGLDELETEPROGRAMPROC, glDeleteProgram) \
 	X(PFNGLBINDBUFFERPROC, glBindBuffer) \
 	X(PFNGLBUFFERDATAPROC, glBufferData) \
 	X(PFNGLGENBUFFERSPROC, glGenBuffers) \
