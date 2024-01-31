@@ -1,50 +1,29 @@
-#ifndef DEBUG
-#define DEBUG 1
-#endif
+// Copyright 2023 Elloramir.
+// Use of this source code is governed by a MIT
+// license that can be found in the LICENSE file.
 
-#define GL_MAJOR 3
-#define GL_MINOR 3
+#include "os.h"
+#include "opengl.h"
+#include <assert.h>
 
-#define WGL_DRAW_TO_WINDOW_ARB 0x2001
-#define WGL_SUPPORT_OPENGL_ARB 0x2010
-#define WGL_DOUBLE_BUFFER_ARB 0x2011
-#define WGL_PIXEL_TYPE_ARB 0x2013
-#define WGL_TYPE_RGBA_ARB 0x202B
-#define WGL_COLOR_BITS_ARB 0x2014
-#define WGL_DEPTH_BITS_ARB 0x2022
-#define WGL_STENCIL_BITS_ARB 0x2023
-#define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
-#define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
-#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB 0x00000001
-#define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
-#define WGL_CONTEXT_FLAGS_ARB 0x2094
-#define WGL_CONTEXT_DEBUG_BIT_ARB 0x0001
-#define WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 0x00000002
-
-typedef const char * (*PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
-typedef BOOL (*PFNWGLCHOOSEPIXELFORMATARBPROC)(HDC hdc, const int32_t* piAttribIList, const FLOAT* pfAttribFList, UINT nMaxFormats, int32_t* piFormats, UINT* nNumFormats);
-typedef HGLRC (*PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int32_t* attribList);
-typedef BOOL (*PFNWGLSWAPINTERVALEXTPROC)(int32_t int32_terval);
-
-static PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = NULL;
-static PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = NULL;
-static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
-
-
-struct {
+static struct
+{
 	HINSTANCE instance;
 	HWND      win_handler;
 	HDC       device_ctx;
 	HGLRC     gl_ctx;
 }
-static self = { 0 };
+self = { 0 };
+
 
 // Display a message box with an error text
-static void panic(const char* message) {
+void os_panic(const char* message) {
 	MessageBoxA(NULL, message, "Error", MB_ICONEXCLAMATION);
 	ExitProcess(0);
 }
 
+// NOTE(ellora): I only use that thing to convert char window title to WSTR
+// and I'm not even freeing that shit lol.
 static LPWSTR utf8_to_utf16(const char* utf8) {
 	int32_t len = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, NULL, 0);
 	LPWSTR utf16 = calloc(len, sizeof(WCHAR));
@@ -53,7 +32,8 @@ static LPWSTR utf8_to_utf16(const char* utf8) {
 	return utf16;
 }
 
-#ifdef DEBUG
+#ifdef GL_DEBUG
+// Cool way to handle opengl debug errors using a debugger (or not)
 static void debug_callback(
 	GLenum source, GLenum type, GLuint32 id, GLenum severity,
 	GLsizei length, const GLchar* message, const void* user)
@@ -70,11 +50,12 @@ static void debug_callback(
 		if (IsDebuggerPresent()) {
 			assert(!"OpenGL error - check the callstack in debugger");
 		}
-		panic("OpenGL API usage error! Use debugger to examine call stack!");
+		os_panic("OpenGL API usage error! Use debugger to examine call stack!");
 	}
 }
 #endif
 
+// That is where all our window messages will be processed
 static LRESULT CALLBACK win_proc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	switch (msg) {
 	case WM_DESTROY:
@@ -85,9 +66,10 @@ static LRESULT CALLBACK win_proc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lpara
 	return DefWindowProcW(wnd, msg, wparam, lparam);
 }
 
-void os_load_gl( void ) {
-	// To get WGL functions we need valid GL context,
-	// so create dummy window for dummy GL contetx.
+// To use modern functions from OpenGL we need to create
+// a fake window to load the wgl function than finally load
+// all gl desire functions through wgl calls.
+static void load_gl( void ) {
 	HWND dummy = CreateWindowExW(
 		0, L"STATIC", L"DummyWindow", WS_OVERLAPPED,
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
@@ -107,15 +89,14 @@ void os_load_gl( void ) {
 
 	int32_t format = ChoosePixelFormat(dc, &desc);
 	if (!format) {
-		panic("Cannot choose OpenGL pixel format for dummy window!");
+		os_panic("Cannot choose OpenGL pixel format for dummy window!");
 	}
 
 	int32_t ok = DescribePixelFormat(dc, format, sizeof(desc), &desc);
 	assert(ok && "Failed to describe OpenGL pixel format");
 
-	// Reason to create dummy window is that SetPixelFormat can be called only once for the window
 	if (!SetPixelFormat(dc, format, &desc)) {
-		panic("Cannot set OpenGL pixel format for dummy window!");
+		os_panic("Cannot set OpenGL pixel format for dummy window!");
 	}
 
 	HGLRC rc = wglCreateContext(dc);
@@ -132,7 +113,7 @@ void os_load_gl( void ) {
 	wglSwapIntervalEXT = (void*)wglGetProcAddress("wglSwapIntervalEXT");
 
 	if (!wglChoosePixelFormatARB || !wglCreateContextAttribsARB || !wglSwapIntervalEXT) {
-		panic("OpenGL does not support required WGL extensions for modern context!");
+		os_panic("OpenGL does not support required WGL extensions for modern context!");
 	}
 
 	wglMakeCurrent(NULL, NULL);
@@ -144,7 +125,7 @@ void os_load_gl( void ) {
 void os_create_window(int32_t width, int32_t height, const char *name) {
 	assert(self.win_handler == NULL && "Window already created");
 
-	// register window class to have custom WindowProc callback
+	// Register window class to have custom WindowProc callback
 	WNDCLASSEXW wc =
 	{
 		.cbSize = sizeof(wc),
@@ -157,11 +138,10 @@ void os_create_window(int32_t width, int32_t height, const char *name) {
 	ATOM atom = RegisterClassExW(&wc);
 	assert(atom && "Failed to register window class");
 
-	// window properties - width, height and style
+	// Create window
 	DWORD exstyle = WS_EX_APPWINDOW;
 	DWORD style = WS_OVERLAPPEDWINDOW;
 
-	// create window
 	self.win_handler = CreateWindowExW(
 		exstyle, wc.lpszClassName, utf8_to_utf16(name), style,
 		CW_USEDEFAULT, CW_USEDEFAULT, width, height,
@@ -172,7 +152,6 @@ void os_create_window(int32_t width, int32_t height, const char *name) {
 	self.device_ctx = GetDC(self.win_handler);
 	assert(self.device_ctx && "Failed to window device context");
 
-	// Pixel format
 	{
 		int32_t attrib[] = {
 			WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
@@ -197,7 +176,7 @@ void os_create_window(int32_t width, int32_t height, const char *name) {
 		int32_t format;
 		UINT formats;
 		if (!wglChoosePixelFormatARB(self.device_ctx, attrib, NULL, 1, &format, &formats) || formats == 0) {
-			panic("OpenGL does not support required pixel format!");
+			os_panic("OpenGL does not support required pixel format!");
 		}
 
 		PIXELFORMATDESCRIPTOR desc = { .nSize = sizeof(desc) };
@@ -205,17 +184,16 @@ void os_create_window(int32_t width, int32_t height, const char *name) {
 		assert(ok && "Failed to describe OpenGL pixel format");
 
 		if (!SetPixelFormat(self.device_ctx, format, &desc)) {
-			panic("Cannot set OpenGL selected pixel format!");
+			os_panic("Cannot set OpenGL selected pixel format!");
 		}
 	}
 
-	// Modern context
 	{
 		int attrib[] = {
 			WGL_CONTEXT_MAJOR_VERSION_ARB, GL_MAJOR,
 			WGL_CONTEXT_MINOR_VERSION_ARB, GL_MINOR,
 			WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-#ifdef DEBUG
+#ifdef GL_DEBUG
 			// Ask for debug context for non "Release" builds
 			// this is so we can enable debug callback
 			WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
@@ -225,7 +203,7 @@ void os_create_window(int32_t width, int32_t height, const char *name) {
 
 		HGLRC rc = wglCreateContextAttribsARB(self.device_ctx, NULL, attrib);
 		if (!rc) {
-			panic("Cannot create modern OpenGL context! OpenGL version 4.5 not supported?");
+			os_panic("Cannot create modern OpenGL context! OpenGL version 4.5 not supported?");
 		}
 		self.gl_ctx = rc;
 
@@ -237,7 +215,7 @@ void os_create_window(int32_t width, int32_t height, const char *name) {
 		GL_FUNCTIONS(X)
 #undef X
 
-#ifdef DEBUG
+#ifdef GL_DEBUG
 		// Enable debug callback
 		glDebugMessageCallback(&debug_callback, NULL);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -278,7 +256,7 @@ bool os_window_is_visible() {
 
 void os_swap_buffers() {
 	if (!SwapBuffers(self.device_ctx)) {
-		panic("Failed to swap OpenGL buffers!");
+		os_panic("Failed to swap OpenGL buffers!");
 	}
 }
 
@@ -290,7 +268,11 @@ void os_sleep(uint32_t miliseconds) {
 int32_t entry_point ( void );
 
 int32_t WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR cmd, int32_t show) {
-	(void)prev; (void)cmd; (void)show;
+	(void)prev;
+	(void)cmd;
+	(void)show;
+
+	load_gl();
 	self.instance = instance;
 	return entry_point();
 }

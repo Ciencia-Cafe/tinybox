@@ -1,7 +1,46 @@
-#ifndef OPENGL_H
-#define OPENGL_H
+// Copyright 2023 Elloramir.
+// Use of this source code is governed by a MIT
+// license that can be found in the LICENSE file.
+
+#ifndef TINYBOX_OPENGL_H
+#define TINYBOX_OPENGL_H
 
 #include <inttypes.h>
+
+#ifndef GL_DEBUG
+#define GL_DEBUG 0
+#endif
+#define GL_MAJOR 3
+#define GL_MINOR 3
+
+#if defined(_WIN32) || defined(_WIN64)
+#include <windows.h>
+
+#define WGL_DRAW_TO_WINDOW_ARB 0x2001
+#define WGL_SUPPORT_OPENGL_ARB 0x2010
+#define WGL_DOUBLE_BUFFER_ARB 0x2011
+#define WGL_PIXEL_TYPE_ARB 0x2013
+#define WGL_TYPE_RGBA_ARB 0x202B
+#define WGL_COLOR_BITS_ARB 0x2014
+#define WGL_DEPTH_BITS_ARB 0x2022
+#define WGL_STENCIL_BITS_ARB 0x2023
+#define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
+#define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
+#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB 0x00000001
+#define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
+#define WGL_CONTEXT_FLAGS_ARB 0x2094
+#define WGL_CONTEXT_DEBUG_BIT_ARB 0x0001
+#define WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 0x00000002
+
+typedef const char * (*PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
+typedef BOOL (*PFNWGLCHOOSEPIXELFORMATARBPROC)(HDC hdc, const int32_t* piAttribIList, const FLOAT* pfAttribFList, UINT nMaxFormats, int32_t* piFormats, UINT* nNumFormats);
+typedef HGLRC (*PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int32_t* attribList);
+typedef BOOL (*PFNWGLSWAPINTERVALEXTPROC)(int32_t int32_terval);
+
+static PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = NULL;
+static PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = NULL;
+static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
+#endif
 
 #define GL_FALSE 0
 #define GL_TRUE 1
@@ -59,19 +98,10 @@ const GLubyte *glGetString(GLenum name);
 
 // OpenGL 3.3 functions
 typedef void (*PFNGLCREATEBUFFERSPROC)(GLsizei n, GLuint* buffers);
-typedef void (*PFNGLNAMEDBUFFERSTORAGEPROC)(GLuint buffer, GLsizeiptr size, const void* data, GLbitfield flags);
 typedef void (*PFNGLBINDVERTEXARRAYPROC)(GLuint array);
 typedef void (*PFNGLCREATEVERTEXARRAYSPROC)(GLsizei n, GLuint* arrays);
-typedef void (*PFNGLVERTEXARRAYATTRIBBINDINGPROC)(GLuint vaobj, GLuint attribindex, GLuint bindingindex);
-typedef void (*PFNGLVERTEXARRAYVERTEXBUFFERPROC)(GLuint vaobj, GLuint bindingindex, GLuint buffer, GLintptr offset, GLsizei stride);
-typedef void (*PFNGLVERTEXARRAYATTRIBFORMATPROC)(GLuint vaobj, GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint relativeoffset);
-typedef void (*PFNGLENABLEVERTEXARRAYATTRIBPROC)(GLuint vaobj, GLuint index);
 typedef GLuint (*PFNGLCREATESHADERPROGRAMVPROC)(GLenum type, GLsizei count, const GLchar* const* strings);
 typedef void (*PFNGLGETPROGRAMINFOLOGPROC)(GLuint program, GLsizei bufSize, GLsizei* length, GLchar* infoLog);
-typedef void (*PFNGLGENPROGRAMPIPELINESPROC)(GLsizei n, GLuint* pipelines);
-typedef void (*PFNGLUSEPROGRAMSTAGESPROC)(GLuint pipeline, GLbitfield stages, GLuint program);
-typedef void (*PFNGLBINDPROGRAMPIPELINEPROC)(GLuint pipeline);
-typedef void (*PFNGLPROGRAMUNIFORMMATRIX2FVPROC)(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
 typedef void (*PFNGLDEBUGMESSAGECALLBACKPROC)(void* callback, const void* userParam);
 typedef void (*PFNGLATTACHSHADERPROC)(GLuint program, GLuint shader);
 typedef void (*PFNGLLINKPROGRAMPROC)(GLuint program);
@@ -94,19 +124,10 @@ typedef void (*PFNGLUSEPROGRAMPROC)(GLuint program);
 
 #define GL_FUNCTIONS(X) \
 	X(PFNGLCREATEBUFFERSPROC, glCreateBuffers) \
-	X(PFNGLNAMEDBUFFERSTORAGEPROC, glNamedBufferStorage) \
 	X(PFNGLBINDVERTEXARRAYPROC, glBindVertexArray) \
 	X(PFNGLCREATEVERTEXARRAYSPROC, glCreateVertexArrays) \
-	X(PFNGLVERTEXARRAYATTRIBBINDINGPROC, glVertexArrayAttribBinding) \
-	X(PFNGLVERTEXARRAYVERTEXBUFFERPROC, glVertexArrayVertexBuffer) \
-	X(PFNGLVERTEXARRAYATTRIBFORMATPROC, glVertexArrayAttribFormat) \
-	X(PFNGLENABLEVERTEXARRAYATTRIBPROC, glEnableVertexArrayAttrib) \
 	X(PFNGLCREATESHADERPROGRAMVPROC, glCreateShaderProgramv) \
 	X(PFNGLGETPROGRAMINFOLOGPROC, glGetProgramInfoLog) \
-	X(PFNGLGENPROGRAMPIPELINESPROC, glGenProgramPipelines) \
-	X(PFNGLUSEPROGRAMSTAGESPROC, glUseProgramStages) \
-	X(PFNGLBINDPROGRAMPIPELINEPROC, glBindProgramPipeline) \
-	X(PFNGLPROGRAMUNIFORMMATRIX2FVPROC, glProgramUniformMatrix2fv) \
 	X(PFNGLDEBUGMESSAGECALLBACKPROC, glDebugMessageCallback) \
 	X(PFNGLATTACHSHADERPROC, glAttachShader) \
 	X(PFNGLLINKPROGRAMPROC, glLinkProgram) \
