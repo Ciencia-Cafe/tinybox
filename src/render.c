@@ -6,6 +6,9 @@
 #include "render.h"
 #include "opengl.h"
 #include "common.h"
+#define STBI_NO_THREAD_LOCALS
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include <stdio.h>
 #include <inttypes.h>
 #include <assert.h>
@@ -28,19 +31,23 @@ static struct
 	uint32_t  ebo;
 	uint32_t  shader;
 
+	mat4      proj;
+	mat4      view;
+
 	Image     pixel;
 	Image     hot_image;
 	Color     hot_color;
 
 	Vertex    vertices[MAX_VERTS];
 	uint32_t  curr_vert;
-	uint32_t  draw_calls; // Same as batch index.
+	uint32_t  curr_quad;
 }
 self = { 0 };
 
 void render_init() {
 	// Create the pixel image
 	self.pixel = render_mem_image(1, 1, (uint8_t[]){255, 255, 255, 255});
+	render_set_image(self.pixel);
 
 	// Default color as white
 	self.hot_color = WHITE;
@@ -90,7 +97,6 @@ void render_frame() {
 void render_flush() {
 	// Bind the vertex array object
 	glBindVertexArray(self.vao);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo);
 
 	// Update the vertex buffer
 	glBindBuffer(GL_ARRAY_BUFFER, self.vbo);
@@ -106,16 +112,34 @@ void render_flush() {
 
 	// Draw the quads
 	glUseProgram(self.shader);
-	glBindTexture(GL_TEXTURE_2D, self.pixel.id);
-	glDrawElements(GL_TRIANGLES, self.draw_calls * 6, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo);
+	glBindTexture(GL_TEXTURE_2D, self.hot_image.id);
+	glDrawElements(GL_TRIANGLES, self.curr_quad * 6, GL_UNSIGNED_INT, 0);
 
 	// Reset stuff
-	self.draw_calls = 0;
+	self.curr_quad = 0;
 	self.curr_vert = 0;
 }
 
 void render_set_color(Color c) {
 	self.hot_color = c;
+}
+
+void render_set_image(Image i) {
+	self.hot_image = i;
+}
+
+// Load image from file using stb image
+Image render_load_image(const char *filename) {
+	int32_t w, h, n;
+	uint8_t *pixels = stbi_load(filename, &w, &h, &n, 4); // Force RGBA
+	if (pixels == NULL) {
+		os_panic("Could't load image");
+	}
+	Image img = render_mem_image(w, h, pixels);
+	stbi_image_free(pixels);
+
+	return img;
 }
 
 Image render_mem_image(int32_t width, int32_t height, const uint8_t *pixels) {
@@ -133,7 +157,7 @@ Image render_mem_image(int32_t width, int32_t height, const uint8_t *pixels) {
 }
 
 void render_push_rec(float x, float y, float w, float h, float u0, float u1, float v0, float v1) {
-	if (self.draw_calls >= MAX_QUADS) {
+	if (self.curr_quad >= MAX_QUADS) {
 		render_flush();
 	}
 
@@ -142,15 +166,14 @@ void render_push_rec(float x, float y, float w, float h, float u0, float u1, flo
 	self.vertices[self.curr_vert++] = make_v(x + w, y + h, u1, v1);
 	self.vertices[self.curr_vert++] = make_v(x, y + h, u0, v1);
 
-	self.draw_calls++;
+	self.curr_quad++;
 }
 
-// These function creates a vertex (because is pretty anoying write it manually)
+// sugar dummy bunny way to create a vertex (because is pretty anoying write it manually)
 Vertex make_v(float x, float y, float u, float v) {
 	return (Vertex) {
 		x, y, self.hot_color.r, self.hot_color.g,
-		self.hot_color.b, self.hot_color.a, u, v
-	};
+		self.hot_color.b, self.hot_color.a, u, v };
 }
 
 uint32_t compile_shader(const char *src, uint32_t kind) {

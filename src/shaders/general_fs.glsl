@@ -5,6 +5,8 @@ out vec4 colour;
 in vec4 color;
 in vec2 uv;
 
+uniform sampler2D tex;
+
 void main() {
-	colour = vec4(color);
+	colour = texture(tex, vec2(uv.x, -uv.y)) * color;
 }

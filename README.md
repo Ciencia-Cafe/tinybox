@@ -1,6 +1,6 @@
 ### Goals:
 - [x] render quads
-- [ ] render images
+- [x] render images
 - [ ] multiple flushs in a single frame
 - [ ] render font texts
 - [ ] push matrices (scale, rotate, translate)
