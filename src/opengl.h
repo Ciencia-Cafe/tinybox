@@ -134,6 +134,9 @@ typedef void (*PFNGLUSEPROGRAMPROC)(GLuint program);
 typedef void (*PFNGLBUFFERSUBDATAPROC)(GLenum target, GLintptr offset, GLsizeiptr size, const void* data);
 typedef void (*PFNGLGENERATEMIPMAPPROC)(GLenum target);
 typedef void (*PFNGLGENVERTEXARRAYSPROC)(GLsizei n, GLuint* arrays);
+typedef void (*PFNGLUNIFORMMATRIX4FVPROC)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+typedef GLint (*PFNGLGETUNIFORMLOCATIONPROC)(GLuint program, const GLchar* name);
+
 
 #define GL_FUNCTIONS(X) \
 	X(PFNGLBINDVERTEXARRAYPROC, glBindVertexArray) \
@@ -159,7 +162,9 @@ typedef void (*PFNGLGENVERTEXARRAYSPROC)(GLsizei n, GLuint* arrays);
 	X(PFNGLUSEPROGRAMPROC, glUseProgram) \
 	X(PFNGLBUFFERSUBDATAPROC, glBufferSubData) \
 	X(PFNGLGENERATEMIPMAPPROC, glGenerateMipmap) \
-	X(PFNGLGENVERTEXARRAYSPROC, glGenVertexArrays)
+	X(PFNGLGENVERTEXARRAYSPROC, glGenVertexArrays) \
+	X(PFNGLUNIFORMMATRIX4FVPROC, glUniformMatrix4fv) \
+	X(PFNGLGETUNIFORMLOCATIONPROC, glGetUniformLocation)
 
 #define X(type, name) extern type name;
 GL_FUNCTIONS(X)

@@ -16,7 +16,7 @@ int entry_point ( void ) {
 			render_frame();
 			render_set_image(cat);
 			render_set_color((Color){ 0.5, 0.25, 0.25, 1 });
-			render_push_rec(-1, -1, 2, 2, 0, 1, 0, 1);
+			render_push_rec(-1.f, -1.f, 1.f, 1.f, 0.f, 1.f, 0.f, 1.f);
 			render_flush();
 			os_swap_buffers();
 		}

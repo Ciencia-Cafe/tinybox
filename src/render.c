@@ -31,8 +31,8 @@ static struct
 	uint32_t  ebo;
 	uint32_t  shader;
 
-	mat4      proj;
-	mat4      view;
+	int32_t   proj_view_loc;
+	mat4      proj_view;
 
 	Image     pixel;
 	Image     hot_image;
@@ -84,10 +84,16 @@ void render_init() {
 		incbin_general_vs_src_start,
 		incbin_general_fs_src_start);
 	assert(self.shader != 0);
+	glUseProgram(self.shader);
+	self.proj_view_loc = glGetUniformLocation(self.shader, "u_proj_view");
+	assert(self.proj_view_loc != -1);
 }
 
 void render_frame() {
 	vec2 w_size = os_window_size();
+	// mat4 view = math_mat4_identity();
+	// mat4 proj = math_mat4_ortho(0, w_size.x, w_size.y, 0, -1, 1);
+	self.proj_view = math_mat4_identity();
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -112,6 +118,7 @@ void render_flush() {
 
 	// Draw the quads
 	glUseProgram(self.shader);
+	glUniformMatrix4fv(self.proj_view_loc, 1, GL_FALSE, &self.proj_view.m0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo);
 	glBindTexture(GL_TEXTURE_2D, self.hot_image.id);
 	glDrawElements(GL_TRIANGLES, self.curr_quad * 6, GL_UNSIGNED_INT, 0);
@@ -156,15 +163,15 @@ Image render_mem_image(int32_t width, int32_t height, const uint8_t *pixels) {
 	return img;
 }
 
-void render_push_rec(float x, float y, float w, float h, float u0, float u1, float v0, float v1) {
+void render_push_rec(float x1, float y1, float x2, float y2, float u0, float u1, float v0, float v1) {
 	if (self.curr_quad >= MAX_QUADS) {
 		render_flush();
 	}
 
-	self.vertices[self.curr_vert++] = make_v(x, y, u0, v0);
-	self.vertices[self.curr_vert++] = make_v(x + w, y, u1, v0);
-	self.vertices[self.curr_vert++] = make_v(x + w, y + h, u1, v1);
-	self.vertices[self.curr_vert++] = make_v(x, y + h, u0, v1);
+	self.vertices[self.curr_vert++] = make_v(x1, y1, u0, v0);
+	self.vertices[self.curr_vert++] = make_v(x2, y1, u1, v0);
+	self.vertices[self.curr_vert++] = make_v(x2, y2, u1, v1);
+	self.vertices[self.curr_vert++] = make_v(x1, y2, u0, v1);
 
 	self.curr_quad++;
 }
