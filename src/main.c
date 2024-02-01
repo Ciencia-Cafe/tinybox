@@ -11,7 +11,8 @@ int entry_point ( void ) {
 
 	while (!os_window_should_close()) {
 		if (os_window_is_visible()) {
-			render_pass();
+			render_frame();
+			render_flush();
 			os_swap_buffers();
 		}
 		else {

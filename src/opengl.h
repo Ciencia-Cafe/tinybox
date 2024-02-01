@@ -55,7 +55,6 @@ static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
 #define GL_FRAGMENT_SHADER 0x8B30
 #define GL_TEXTURE_2D 0x0DE1
 #define GL_TEXTURE_MIN_FILTER 0x2801
-#define GL_NEAREST 0x2600
 #define GL_TEXTURE_MAG_FILTER 0x2800
 #define GL_TEXTURE_WRAP_S 0x2802
 #define GL_REPEAT 0x2901
@@ -72,6 +71,12 @@ static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
 #define GL_COMPILE_STATUS 0x8B81
 #define GL_ARRAY_BUFFER 0x8892
 #define GL_STATIC_DRAW 0x88E4
+#define GL_ELEMENT_ARRAY_BUFFER 0x8893
+#define GL_UNSIGNED_INT 0x1405
+#define GL_DYNAMIC_DRAW 0x88E8
+#define GL_LINEAR 0x2601
+#define GL_NEAREST 0x2600
+#define GL_ARRAY_BUFFER_BINDING 0x8894
 
 typedef uint32_t GLenum;
 typedef uint32_t GLuint32;
@@ -93,13 +98,19 @@ void glViewport(GLint x, GLint y, GLsizei width, GLsizei height);
 void glClearColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
 void glClear(GLbitfield mask);
 void glDisable(GLenum cap);
+void glBindTexture(GLenum target, GLuint texture);
 void glDrawArrays(GLenum mode, GLint first, GLsizei count);
 const GLubyte *glGetString(GLenum name);
+void glActiveTexture(GLenum texture);
+void glTexParameteri(GLenum target, GLenum pname, GLint param);
+void glGenTextures(GLsizei n, GLuint *textures);
+void glBindTexture(GLenum target, GLuint texture);
+void glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void *pixels);
+void glDeleteTextures(GLsizei n, const GLuint *textures);
+void glDrawElements(GLenum mode, GLsizei count, GLenum type, const void *indices);
 
 // OpenGL 3.3 functions
-typedef void (*PFNGLCREATEBUFFERSPROC)(GLsizei n, GLuint* buffers);
 typedef void (*PFNGLBINDVERTEXARRAYPROC)(GLuint array);
-typedef void (*PFNGLCREATEVERTEXARRAYSPROC)(GLsizei n, GLuint* arrays);
 typedef GLuint (*PFNGLCREATESHADERPROGRAMVPROC)(GLenum type, GLsizei count, const GLchar* const* strings);
 typedef void (*PFNGLGETPROGRAMINFOLOGPROC)(GLuint program, GLsizei bufSize, GLsizei* length, GLchar* infoLog);
 typedef void (*PFNGLDEBUGMESSAGECALLBACKPROC)(void* callback, const void* userParam);
@@ -120,11 +131,12 @@ typedef void (*PFNGLGENBUFFERSPROC)(GLsizei n, GLuint* buffers);
 typedef void (*PFNGLVERTEXATTRIBPOINTERPROC)(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer);
 typedef void (*PFNGLENABLEVERTEXATTRIBARRAYPROC)(GLuint index);
 typedef void (*PFNGLUSEPROGRAMPROC)(GLuint program);
+typedef void (*PFNGLBUFFERSUBDATAPROC)(GLenum target, GLintptr offset, GLsizeiptr size, const void* data);
+typedef void (*PFNGLGENERATEMIPMAPPROC)(GLenum target);
+typedef void (*PFNGLGENVERTEXARRAYSPROC)(GLsizei n, GLuint* arrays);
 
 #define GL_FUNCTIONS(X) \
-	X(PFNGLCREATEBUFFERSPROC, glCreateBuffers) \
 	X(PFNGLBINDVERTEXARRAYPROC, glBindVertexArray) \
-	X(PFNGLCREATEVERTEXARRAYSPROC, glCreateVertexArrays) \
 	X(PFNGLCREATESHADERPROGRAMVPROC, glCreateShaderProgramv) \
 	X(PFNGLGETPROGRAMINFOLOGPROC, glGetProgramInfoLog) \
 	X(PFNGLDEBUGMESSAGECALLBACKPROC, glDebugMessageCallback) \
@@ -144,7 +156,10 @@ typedef void (*PFNGLUSEPROGRAMPROC)(GLuint program);
 	X(PFNGLGENBUFFERSPROC, glGenBuffers) \
 	X(PFNGLVERTEXATTRIBPOINTERPROC, glVertexAttribPointer) \
 	X(PFNGLENABLEVERTEXATTRIBARRAYPROC, glEnableVertexAttribArray) \
-	X(PFNGLUSEPROGRAMPROC, glUseProgram)
+	X(PFNGLUSEPROGRAMPROC, glUseProgram) \
+	X(PFNGLBUFFERSUBDATAPROC, glBufferSubData) \
+	X(PFNGLGENERATEMIPMAPPROC, glGenerateMipmap) \
+	X(PFNGLGENVERTEXARRAYSPROC, glGenVertexArrays)
 
 #define X(type, name) extern type name;
 GL_FUNCTIONS(X)
