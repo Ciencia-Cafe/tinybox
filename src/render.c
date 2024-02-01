@@ -2,6 +2,7 @@
 // Use of this source code is governed by a MIT
 // license that can be found in the LICENSE file.
 
+#include "os.h"
 #include "render.h"
 #include "opengl.h"
 #include "common.h"
@@ -14,6 +15,7 @@ INCBIN(general_fs_src, "src/shaders/general_fs.glsl");
 
 static uint32_t compile_shader(const char *src, uint32_t kind);
 static uint32_t compile_shader_src(const char *vs, const char *fs);
+static inline Vertex make_v(float x, float y, float u, float v);
 
 #define MAX_QUADS (1 << 14)
 #define MAX_VERTS (MAX_QUADS * 4)
@@ -36,9 +38,6 @@ static struct
 }
 self = { 0 };
 
-uint32_t shader;
-uint32_t vbo_test, vao_test;
-
 void render_init() {
 	// Create the pixel image
 	self.pixel = render_mem_image(1, 1, (uint8_t[]){255, 255, 255, 255});
@@ -56,7 +55,7 @@ void render_init() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(self.vertices), NULL, GL_DYNAMIC_DRAW);
 
 	// NOTE(ellora):
-	// Indices are always the same, so we can just set them once.
+	// Indices are allways the same, so we can just set them once.
 	uint32_t indxs[MAX_INDXS];
 	for (uint32_t v = 0, i = 0; i < MAX_INDXS; i+= 6, v+= 4)  {
 		indxs[i + 0] = v + 0;
@@ -81,9 +80,11 @@ void render_init() {
 }
 
 void render_frame() {
+	vec2 w_size = os_window_size();
+
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glViewport(0, 0, 800, 600);
+	glViewport(0, 0, w_size.x, w_size.y);
 }
 
 void render_flush() {
@@ -113,6 +114,10 @@ void render_flush() {
 	self.curr_vert = 0;
 }
 
+void render_set_color(Color c) {
+	self.hot_color = c;
+}
+
 Image render_mem_image(int32_t width, int32_t height, const uint8_t *pixels) {
 	Image img = { .id = 0, .width = width, .height = height };
 
@@ -125,6 +130,27 @@ Image render_mem_image(int32_t width, int32_t height, const uint8_t *pixels) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return img;
+}
+
+void render_push_rec(float x, float y, float w, float h, float u0, float u1, float v0, float v1) {
+	if (self.draw_calls >= MAX_QUADS) {
+		render_flush();
+	}
+
+	self.vertices[self.curr_vert++] = make_v(x, y, u0, v0);
+	self.vertices[self.curr_vert++] = make_v(x + w, y, u1, v0);
+	self.vertices[self.curr_vert++] = make_v(x + w, y + h, u1, v1);
+	self.vertices[self.curr_vert++] = make_v(x, y + h, u0, v1);
+
+	self.draw_calls++;
+}
+
+// These function creates a vertex (because is pretty anoying write it manually)
+Vertex make_v(float x, float y, float u, float v) {
+	return (Vertex) {
+		x, y, self.hot_color.r, self.hot_color.g,
+		self.hot_color.b, self.hot_color.a, u, v
+	};
 }
 
 uint32_t compile_shader(const char *src, uint32_t kind) {

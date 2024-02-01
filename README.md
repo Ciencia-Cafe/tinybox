@@ -1,5 +1,5 @@
 ### Goals:
-- [ ] render quads
+- [x] render quads
 - [ ] render images
 - [ ] multiple flushs in a single frame
 - [ ] render font texts

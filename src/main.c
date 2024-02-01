@@ -12,6 +12,8 @@ int entry_point ( void ) {
 	while (!os_window_should_close()) {
 		if (os_window_is_visible()) {
 			render_frame();
+			render_set_color((Color){ 0.1, 0.5, 0.25, 1 });
+			render_push_rec(0, 0, 0.1, 0.2, 0, 1, 0, 1);
 			render_flush();
 			os_swap_buffers();
 		}
