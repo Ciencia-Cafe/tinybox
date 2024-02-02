@@ -42,15 +42,49 @@ mat4 math_mat4_mul(mat4 a, mat4 b) {
 mat4 math_mat4_ortho(float left, float right, float bottom, float top, float near, float far) {
 	mat4 result = { 0 };
 
-	result.m0 = 2.0f / (right - left);
-	result.m5 = 2.0f / (top - bottom);
-	result.m10 = -2.0f / (far - near);
-	result.m12 = -(right + left)/(right - left);
-	result.m13 = -(top + bottom)/(top - bottom);
-	result.m14 = -(far + near)/(far - near);
+	float rl = right - left;
+	float tb = top - bottom;
+	float fn = far - near;
+
+	result.m0 = 2.0f/rl;
+	result.m1 = 0.0f;
+	result.m2 = 0.0f;
+	result.m3 = 0.0f;
+	result.m4 = 0.0f;
+	result.m5 = 2.0f/tb;
+	result.m6 = 0.0f;
+	result.m7 = 0.0f;
+	result.m8 = 0.0f;
+	result.m9 = 0.0f;
+	result.m10 = -2.0f/fn;
+	result.m11 = 0.0f;
+	result.m12 = -(left + right)/rl;
+	result.m13 = -(top + bottom)/tb;
+	result.m14 = -(far + near)/fn;
 	result.m15 = 1.0f;
 
 	return result;
 }
 
+mat4 math_mat4_transpose(mat4 m) {
+	mat4 result = { 0 };
 
+	result.m0 = m.m0;
+	result.m1 = m.m4;
+	result.m2 = m.m8;
+	result.m3 = m.m12;
+	result.m4 = m.m1;
+	result.m5 = m.m5;
+	result.m6 = m.m9;
+	result.m7 = m.m13;
+	result.m8 = m.m2;
+	result.m9 = m.m6;
+	result.m10 = m.m10;
+	result.m11 = m.m14;
+	result.m12 = m.m3;
+	result.m13 = m.m7;
+	result.m14 = m.m11;
+	result.m15 = m.m15;
+
+	return result;
+}

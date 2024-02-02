@@ -8,5 +8,5 @@ in vec2 uv;
 uniform sampler2D tex;
 
 void main() {
-	colour = texture(tex, vec2(uv.x, -uv.y)) * color;
+	colour = texture(tex, uv) * color;
 }

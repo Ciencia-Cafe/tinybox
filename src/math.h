@@ -25,5 +25,6 @@ mat4;
 mat4 math_mat4_mul(mat4 a, mat4 b);
 mat4 math_mat4_identity();
 mat4 math_mat4_ortho(float left, float right, float bottom, float top, float near, float far);
+mat4 math_mat4_transpose(mat4 m);
 
 #endif

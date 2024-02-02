@@ -90,10 +90,11 @@ void render_init() {
 }
 
 void render_frame() {
+	// TODO(ellora): to fix, this is the frame size not the window...
 	vec2 w_size = os_window_size();
-	// mat4 view = math_mat4_identity();
-	// mat4 proj = math_mat4_ortho(0, w_size.x, w_size.y, 0, -1, 1);
-	self.proj_view = math_mat4_identity();
+	mat4 view = math_mat4_identity();
+	mat4 proj = math_mat4_ortho(0.f, w_size.x, w_size.y, 0.f, -1.f, 1.f);
+	self.proj_view = math_mat4_mul(proj, view);
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -118,7 +119,8 @@ void render_flush() {
 
 	// Draw the quads
 	glUseProgram(self.shader);
-	glUniformMatrix4fv(self.proj_view_loc, 1, GL_FALSE, &self.proj_view.m0);
+	// NOTE(ellora): For some reason we need to transpose the matrix...
+	glUniformMatrix4fv(self.proj_view_loc, 1, GL_TRUE, &self.proj_view.m0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo);
 	glBindTexture(GL_TEXTURE_2D, self.hot_image.id);
 	glDrawElements(GL_TRIANGLES, self.curr_quad * 6, GL_UNSIGNED_INT, 0);
