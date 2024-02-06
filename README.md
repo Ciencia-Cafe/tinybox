@@ -1,7 +1,7 @@
 ### Goals:
 - [x] render quads
 - [x] render images
-- [ ] multiple flushs in a single frame
+- [x] multiple flushs in a single frame
 - [ ] render font texts
 - [ ] push matrices (scale, rotate, translate)
 - [ ] keyboard and mouse suport (maybe joystick too)

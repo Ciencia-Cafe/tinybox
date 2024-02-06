@@ -268,6 +268,67 @@ void os_sleep(uint32_t miliseconds) {
 	Sleep(miliseconds);
 }
 
+void *os_load_file(const char *filename) {
+	HANDLE file = CreateFileA(
+		filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (file == INVALID_HANDLE_VALUE) {
+		return NULL;
+	}
+
+	LARGE_INTEGER file_size;
+	if (!GetFileSizeEx(file, &file_size)) {
+		CloseHandle(file);
+		return NULL;
+	}
+
+	void *data = malloc(file_size.QuadPart);
+	if (!data) {
+		CloseHandle(file);
+		return NULL;
+	}
+
+	DWORD read;
+	if (!ReadFile(file, data, file_size.QuadPart, &read, NULL)) {
+		CloseHandle(file);
+		free(data);
+		return NULL;
+	}
+
+	CloseHandle(file);
+	return data;
+}
+
+void os_free_file(void *data) {
+	free(data);
+}
+
+void os_show_cursor(bool show) {
+	ShowCursor(show);
+}
+
+void os_set_cursor_position(int32_t x, int32_t y) {
+	POINT point = { .x = x, .y = y };
+	ClientToScreen(self.win_handler, &point);
+	SetCursorPos(point.x, point.y);
+}
+
+void os_close_window() {
+	DestroyWindow(self.win_handler);
+	self.win_handler = NULL;
+}
+
+void os_quit() {
+	PostQuitMessage(0);
+}
+
+void os_set_window_title(const char *title) {
+	SetWindowTextW(self.win_handler, utf8_to_utf16(title));
+}
+
+void os_set_window_icon(const char *filename) {
+	(void)filename;
+}
+
 // Entry point defined by the user
 int32_t entry_point ( void );
 

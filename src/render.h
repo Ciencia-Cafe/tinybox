@@ -6,6 +6,7 @@
 #define TINYBOX_RENDER_H
 
 #include "math.h"
+#include "stb_truetype.h"
 #include <inttypes.h>
 
 #define WHITE (Color){1.0f, 1.0f, 1.0f, 1.0f}
@@ -13,25 +14,23 @@
 
 typedef struct { float r, g, b, a; } Color;
 
-#define ATTRIB_POSITION   0
-#define ATTRIB_COLOR      1
-#define ATTRIB_TEXCOORDS  2
-
-typedef struct
-{
-	float x, y;
-	float u, v;
-	float r, g, b, a;
-}
-Vertex;
-
 typedef struct
 {
 	uint32_t id;
-	int32_t width;
-	int32_t height;
+	int32_t  width;
+	int32_t  height;
 }
 Image;
+
+typedef struct
+{
+	Image            atlas;
+	// We need a new set for each alphabet
+	// this font supports it.
+	stbtt_bakedchar *glyphs;
+	stbtt_fontinfo   stbfont;
+}
+Font;
 
 void render_init();
 void render_frame();
@@ -46,9 +45,10 @@ void render_translate(float x, float y);
 void render_scale(float sx, float sy);
 void render_rotate(float r);
 
+Font *render_load_font(const char *filename, int32_t size);
 Image render_load_image(const char *filename); 
 Image render_mem_image(int32_t width, int32_t height, const uint8_t *pixels);
 
-void render_push_rec(float x, float y, float w, float h, float u0, float u1, float v0, float v1);
+void render_push_quad(float x1, float y1, float x2, float y2, float u0, float u1, float v0, float v1);
 
 #endif
